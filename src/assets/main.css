@@ -1,0 +1,60 @@
+@import './base.css';
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0 2rem;
+  }
+}
+.text-box {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  font-size: 1.2rem; /*增加字体大小*/
+  width: 80%; /*设置宽度*/
+}
+
+.text-box label {
+  margin-bottom: 0.5rem;
+}
+
+.text-box textarea {
+  height: 6rem; /*设置高度*/
+  padding: 0.5rem;
+  font-size: inherit; /*继承父元素的字体大小*/
+}
+/* 定义tab样式 */
+.tab {
+  display: inline-block;
+  width: 4em;
+  text-align: center;
+  margin-right: 1em;
+  tab-size: 4;
+}
