@@ -50,11 +50,3 @@ a,
   padding: 0.5rem;
   font-size: inherit; /*继承父元素的字体大小*/
 }
-/* 定义tab样式 */
-.tab {
-  display: inline-block;
-  width: 4em;
-  text-align: center;
-  margin-right: 1em;
-  tab-size: 4;
-}

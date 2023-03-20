@@ -1,28 +1,28 @@
 
 <template>
 
-  <div class='App'>
-        <router-view></router-view>
+  <div class='Home'>
 
     <h1>童话镇打卡 </h1>
     <h2>今天：{{ date }}</h2>
     <form @submit.prevent="submitForm">
       <div>
         <label for="name">主持：</label>
-        <input type="name" id="name" v-model="selectedName" required>
-<!-- 
+        <!-- <input type="name" id="name" v-model="selectedName" required> -->
+
         <select id="name" v-model="selectedName" required>
           <option v-for="(name, index) in nameOptions" :key="index" :value="name">{{name}}</option>
-        </select>这是另一个注释 -->
+        </select>
       </div>
-      <div>
-        <label for="password">无敌炫酷吊炸天密码：</label>
-        <input type="password" id="password" v-model="password" required>
-      </div>
+
         <div class="text-box">
-        <label for="text">麦序：</label>
-        <textarea id="text" v-model="text" required></textarea>
+        <label for="text">麦序1:</label>
+        <textarea id="text1" v-model="text1" required></textarea>
         </div>
+        <div class="text-box">
+          <label for="text">麦序2:</label>
+          <textarea id="text2" v-model="text2"></textarea>
+          </div>
         <div>
             <label for="selectedDate">请选择日期：</label>
             <input type="date" id="selectedDate" v-model="selectedDate" required>
@@ -39,7 +39,15 @@
     </form>
             <div class="text-box">
         <label for="text">打卡结果：</label>
-        <textarea id="result" v-model="result"></textarea>
+
+        <textarea ref="myText" id="result" v-model="result"></textarea>
+        
+        </div>
+        <button @click="copyText">复制</button>
+
+        <div>
+          <label for="password">管理密码（不用填）：</label>
+          <input type="password" id="password" v-model="password">
         </div>
   </div>
 
@@ -52,14 +60,16 @@ export default {
     return {
       selectedName:'',
       password: '',
-      text: '',
+      text1: '',
+      text2: '',
       selectedTime: '',
       lastSubmitTime: null,
       selectedDate: new Date().toISOString().slice(0, 10),
       date: null,
       timeOptions: ['0-2', '2-4', '4-6', '6-8', '8-10', '10-12', '12-14', '14-16', '16-18', '18-20', '20-22', '22-24'],
-      nameOptions: ['靓妹','笨蛋灵生','啵啵','嘟嘟','好运','染染','仙女','芭比','酸笋','不晚','点点','迷人甜','辣辣','尤雾','甜甜'],    
-      validPassword: '1', // 设置有效的密码
+      nameOptions: ['靓妹','灵生','啵啵','美女嘟嘟','好运','染染','仙女','芭比','酸笋','不晚','点点','迷人甜','辣辣','尤雾','甜甜','好诗','兔子','小熊','清玖','熙熙','童童'],    
+      validPassword: '', // 设置有效的密码
+      adminPassword: 'dragon666',
       result: "",
     showError: false,
     myData: {},
@@ -72,6 +82,9 @@ export default {
         const month = (date.getMonth() + 1).toString().padStart(2, '0')
         const day = date.getDate().toString().padStart(2, '0')
         this.date = `${year}-${month}-${day}`
+        if (!localStorage.getItem('savedData')){
+          localStorage.setItem('savedData',JSON.stringify({}))
+        }
     },
   computed: {
     isDisabled() {
@@ -95,49 +108,69 @@ export default {
   methods: {
 
     submitForm() {
+      if (this.password == this.adminPassword) {
+        localStorage.setItem('savedData',JSON.stringify({}))
+        alert('清理成功');
+        return;
+      }
     if (this.password !== this.validPassword) {
         this.showError = true;
         return;
       }
       this.showError = false;
-      this.processData()
-    if (this.text.includes('\n')) {
+    if (this.text1.includes('\n')) {
         alert('麦序统计里不能换行！');
         return;
     }
-
+    if (this.text2.includes('\n')) {
+        alert('麦序统计里不能换行！');
+        return;
+    }
     // 在这里发送数据到后端保存到数据库中
-      console.log('姓名：' + this.selectedName);
-      console.log('密码：' + this.password);
-      console.log('打卡文字：' + this.text);
-      console.log('选择的时间段：' + this.selectedTime);
-      console.log('时间戳：' + new Date().getTime());
+    this.processData()
+
       this.lastSubmitTime = new Date().getTime();
       alert('打卡成功！');
         this.name = '';
         this.password = '';
-        this.text = '';
+        this.text1 = '';
+        this.text2 = '';
         this.selectedTime = '';
     },
     processData(){
       // 处理数据
-      this.textArray = this.text.split('@').filter(str => str !== '')
-      this.textArray.forEach(key => key in this.myData ? this.myData[key]++ : this.myData[key] = 1);
-      this.result = `${this.date}\n${this.selectedName}\n${this.selectedTime}\n`
-    Object.entries(this.myData).forEach(([key, value]) => {
-      this.result += `@${key} ${value} `;
-    });
-    this.myData = {};
+      const tempText = this.text1+this.text2;
+      console.log(tempText);
+      this.textArray = tempText.split('@').filter(str => str !== '')
+      this.textArray.forEach(key => {
+        const trimmedKey = key.trim();
+        if (trimmedKey in this.myData) {
+          this.myData[trimmedKey]++;
+        } else {
+          this.myData[trimmedKey] = 1;
+        }
+      });      
+      this.result = `--童话镇打卡表--\n${this.date}\n${this.selectedName}\n${this.selectedTime}\n`
+      Object.entries(this.myData).forEach(([key, value]) => {
+        this.result += `@${key} ${value} `;
+      });
+      this.myData = {};
 
       const allData = JSON.parse(localStorage.getItem('savedData'))
         if (!allData.hasOwnProperty(this.selectedDate)) {
             allData[this.selectedDate] = {};
         }      
         const total = allData[this.selectedDate]
-      this.textArray.forEach(key => key in total ? total[key]++ : total[key] = 1);
+      this.textArray.forEach(key => console.log(key.trim()))
+      this.textArray.forEach(key => {
+        const trimmedKey = key.trim();
+        if (trimmedKey in total) {
+          total[trimmedKey]++;
+        } else {
+          total[trimmedKey] = 1;
+        }
+      });
       allData[this.selectedDate] = total;
-
-      console.log(allData);
       localStorage.setItem('savedData', JSON.stringify(allData));
     },
 
@@ -149,6 +182,11 @@ export default {
         const [start, end] = this.selectedTime.split('-');
         return new Date().setHours(Number(end), 0, 0, 0);
         },
+
+    copyText() {
+      this.$refs.myText.select() // 选中文本框内容
+      document.execCommand('copy') // 执行复制命令
+    }
     },
 };
 </script>
